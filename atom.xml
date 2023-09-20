@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>https://github.com/tuliyao/tuliyao.github.io</id>
+    <title>Gridea</title>
+    <updated>2023-09-20T10:11:31.050Z</updated>
+    <generator>https://github.com/jpmonette/feed</generator>
+    <link rel="alternate" href="https://github.com/tuliyao/tuliyao.github.io"/>
+    <link rel="self" href="https://github.com/tuliyao/tuliyao.github.io/atom.xml"/>
+    <subtitle>温故而知新</subtitle>
+    <logo>https://github.com/tuliyao/tuliyao.github.io/images/avatar.png</logo>
+    <icon>https://github.com/tuliyao/tuliyao.github.io/favicon.ico</icon>
+    <rights>All rights reserved 2023, Gridea</rights>
+    <entry>
+        <title type="html"><![CDATA[工具列表]]></title>
+        <id>https://github.com/tuliyao/tuliyao.github.io/post/gong-ju-lie-biao/</id>
+        <link href="https://github.com/tuliyao/tuliyao.github.io/post/gong-ju-lie-biao/">
+        </link>
+        <updated>2023-09-20T10:08:04.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="截图工具">截图工具</h1>
+<ul>
+<li>snipast</li>
+<li>FSCapture</li>
+<li>ShareX</li>
+<li>OBS Studio</li>
+</ul>
+<h1 id="数据传输工具">数据传输工具</h1>
+<ul>
+<li>vector</li>
+</ul>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[faststone capture 注册码]]></title>
+        <id>https://github.com/tuliyao/tuliyao.github.io/post/faststone-capture-zhu-ce-ma/</id>
+        <link href="https://github.com/tuliyao/tuliyao.github.io/post/faststone-capture-zhu-ce-ma/">
+        </link>
+        <updated>2023-09-20T10:06:41.000Z</updated>
+        <content type="html"><![CDATA[<p>企业版​​序列号：<br>
+name：bluman<br>
+serial/序列号/注册码：VPISCJULXUFGDDXYAUYF</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Linux修改主机名]]></title>
+        <id>https://github.com/tuliyao/tuliyao.github.io/post/linux-xiu-gai-zhu-ji-ming/</id>
+        <link href="https://github.com/tuliyao/tuliyao.github.io/post/linux-xiu-gai-zhu-ji-ming/">
+        </link>
+        <updated>2023-06-06T08:25:24.000Z</updated>
+        <content type="html"><![CDATA[<h3 id="永久修改主机名">永久修改主机名</h3>
+<pre><code>1、方法一：使用hostnamectl命令
+
+[root@fangjian ~]# hostnamectl set-hostname Brace #永久设置用户名，关机后不失效
+[root@fangjian ~]# hostname
+brace
+
+2、方法二：修改配置文件 /etc/hostname 保存退出
+
+[root@fangjian ~]# vi /etc/hostname # 进入vi，删除旧主机名，输入新主机名，Esc后冒号 wq退出保存
+brace　　　　 # reboot重启生效
+</code></pre>
+<h2 id="临时修改主机名">临时修改主机名</h2>
+<pre><code>[root@fangjian ~]# hostname yin #临时修改主机名，关机后失效
+[root@fangjian ~]# hostname
+yin
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Markdown语法]]></title>
+        <id>https://github.com/tuliyao/tuliyao.github.io/post/markdown-yu-fa/</id>
+        <link href="https://github.com/tuliyao/tuliyao.github.io/post/markdown-yu-fa/">
+        </link>
+        <updated>2023-03-16T09:25:23.000Z</updated>
+        <content type="html"><![CDATA[<p><a href="https://markdown.com.cn/basic-syntax/links.html"><strong>参考文章1</strong></a><br>
+<a href="https://www.runoob.com/markdown/md-tutorial.html"><strong>参考文章2</strong></a></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[windows版go版本控制工具间g的使用]]></title>
+        <id>https://github.com/tuliyao/tuliyao.github.io/post/windows-ban-go-ban-ben-kong-zhi-gong-ju-jian-g-de-shi-yong/</id>
+        <link href="https://github.com/tuliyao/tuliyao.github.io/post/windows-ban-go-ban-ben-kong-zhi-gong-ju-jian-g-de-shi-yong/">
+        </link>
+        <updated>2023-03-16T09:20:45.000Z</updated>
+        <content type="html"><![CDATA[<p><a href="https://github.com/voidint/g">github地址</a><br>
+<strong>安装</strong></p>
+<blockquote>
+<p>创建目录mkdir ~/.g/bin<br>
+下载release的windows版本的二进制压缩包, 解压之后放到~/.g/bin目录下<br>
+默认二进制文件名是 g.exe, 如果你已经用g这个命令已经用作为 git 的缩写，那么你可以把 g.exe 改为其他名字，如 gvm.exe<br>
+执行命令code $PROFILE, 这个命令会用vscode打开默认的powershell配置文件<br>
+添加g.exe所在目录到环境变量PATH中</p>
+</blockquote>
+<p><strong>使用</strong><br>
+<em>查询当前可供安装的stable状态的go版本</em></p>
+<blockquote>
+<p>g ls-remote stable<br>
+1.13.15<br>
+1.14.7</p>
+</blockquote>
+<p><em>安装目标go版本1.14.7</em></p>
+<blockquote>
+<p>g install 1.14.7<br>
+Downloading 100% |███████████████| (119/119 MB, 9.939 MB/s) [12s:0s]<br>
+Computing checksum with SHA256<br>
+Checksums matched<br>
+Now using go1.14.7</p>
+</blockquote>
+<p><em>查询已安装的go版本</em></p>
+<blockquote>
+<p>g ls<br>
+1.7.6<br>
+1.11.13<br>
+1.12.17<br>
+1.13.15<br>
+1.14.6</p>
+</blockquote>
+<ul>
+<li>1.14.7</li>
+</ul>
+<p><em>查询可供安装的所有go版本</em></p>
+<blockquote>
+<p>g ls-remote<br>
+1<br>
+1.2.2<br>
+1.3<br>
+1.3.1<br>
+...    // 省略若干版本<br>
+1.14.5<br>
+1.14.6</p>
+</blockquote>
+<ul>
+<li>1.14.7<br>
+1.15rc1</li>
+</ul>
+<p><em>切换到另一个已安装的go版本</em></p>
+<blockquote>
+<p>g use 1.14.6<br>
+go version go1.14.6 darwin/amd64</p>
+</blockquote>
+<p><em>卸载一个已安装的go版本</em></p>
+<blockquote>
+<p>g uninstall 1.14.7<br>
+Uninstalled go1.14.7</p>
+</blockquote>
+<p><em>更新 g 软件本身</em></p>
+<blockquote>
+<p>g update<br>
+A new version of g(v1.2.2) is available<br>
+Downloading 100% |███████████████| (3.7/3.7 MB, 2.358 MB/s)<br>
+Computing checksum with SHA256<br>
+Checksums matched<br>
+Update completed</p>
+</blockquote>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Git基础命令操作使用]]></title>
+        <id>https://github.com/tuliyao/tuliyao.github.io/post/git-ji-chu-ming-ling-cao-zuo-shi-yong/</id>
+        <link href="https://github.com/tuliyao/tuliyao.github.io/post/git-ji-chu-ming-ling-cao-zuo-shi-yong/">
+        </link>
+        <updated>2023-03-10T07:04:41.000Z</updated>
+        <summary type="html"><![CDATA[<h1 id="还原远程分支到指定版本"><strong>还原远程分支到指定版本</strong></h1>
+<pre><code>- git reset --hard 指定版本号
+- git push -f -u origin 指定分支
+</code></pre>
+]]></summary>
+        <content type="html"><![CDATA[<h1 id="还原远程分支到指定版本"><strong>还原远程分支到指定版本</strong></h1>
+<pre><code>- git reset --hard 指定版本号
+- git push -f -u origin 指定分支
+</code></pre>
+<!-- more -->
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[YUM使用]]></title>
+        <id>https://github.com/tuliyao/tuliyao.github.io/post/yum-shi-yong/</id>
+        <link href="https://github.com/tuliyao/tuliyao.github.io/post/yum-shi-yong/">
+        </link>
+        <updated>2023-03-07T03:42:21.000Z</updated>
+        <content type="html"><![CDATA[<p>123</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Grpc分析]]></title>
+        <id>https://github.com/tuliyao/tuliyao.github.io/post/grpc-fen-xi/</id>
+        <link href="https://github.com/tuliyao/tuliyao.github.io/post/grpc-fen-xi/">
+        </link>
+        <updated>2023-03-06T11:40:44.000Z</updated>
+        <content type="html"><![CDATA[<p>123</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[DOCKER 使用]]></title>
+        <id>https://github.com/tuliyao/tuliyao.github.io/post/docker-shi-yong/</id>
+        <link href="https://github.com/tuliyao/tuliyao.github.io/post/docker-shi-yong/">
+        </link>
+        <updated>2023-03-06T10:21:58.000Z</updated>
+        <content type="html"><![CDATA[<p>123</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[ETCD 使用与源码分析]]></title>
+        <id>https://github.com/tuliyao/tuliyao.github.io/post/etcd-shi-yong/</id>
+        <link href="https://github.com/tuliyao/tuliyao.github.io/post/etcd-shi-yong/">
+        </link>
+        <updated>2023-03-06T10:21:40.000Z</updated>
+        <content type="html"><![CDATA[<p>123</p>
+]]></content>
+    </entry>
+</feed>
