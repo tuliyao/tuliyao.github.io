@@ -1,0 +1,329 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Clickhouse+Vector安装使用 | Gridea</title>
+<link rel="shortcut icon" href="https://github.com/tuliyao/tuliyao.github.io/favicon.ico?v=1724036220084">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://github.com/tuliyao/tuliyao.github.io/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="Clickhouse+Vector安装使用 | Gridea - Atom Feed" href="https://github.com/tuliyao/tuliyao.github.io/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+    <meta name="description" content="Clickhouse安装使用
+安装
+sudo yum install -y yum-utils
+sudo yum-config-manager --add-repo https://packages.clickhouse.com/rpm/c..." />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://github.com/tuliyao/tuliyao.github.io">
+  <img class="avatar" src="https://github.com/tuliyao/tuliyao.github.io/images/avatar.png?v=1724036220084" alt="">
+  </a>
+  <h1 class="site-title">
+    Gridea
+  </h1>
+  <p class="site-description">
+    温故而知新
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Clickhouse+Vector安装使用
+            </h2>
+            <div class="post-info">
+              <span>
+                2024-01-22
+              </span>
+              <span>
+                4 min read
+              </span>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content" v-pre>
+                <h1 id="clickhouse安装使用">Clickhouse安装使用</h1>
+<h3 id="安装">安装</h3>
+<pre><code>sudo yum install -y yum-utils
+sudo yum-config-manager --add-repo https://packages.clickhouse.com/rpm/clickhouse.repo
+sudo yum install -y clickhouse-server clickhouse-client
+
+sudo /etc/init.d/clickhouse-server start
+clickhouse-client # or &quot;clickhouse-client --password&quot; if you set up apassword.
+</code></pre>
+<h3 id="配置">配置</h3>
+<ul>
+<li>修改服务配置 /etc/clickhouse-server/config.xml</li>
+<li>修改用户配置  vim /etc/clickhouse-server/users.xml</li>
+<li>创建目录 /data/clickhouse</li>
+<li>给clickhouse用户添加目录权限 chown clickhouse:clickhouse /data/clickhouse</li>
+</ul>
+<h3 id="操作">操作</h3>
+<ul>
+<li>启动 systemctl start clickhouse-server.service</li>
+<li>停止 systemctl stop clickhouse-server.service</li>
+<li>查看 systemctl status clickhouse-server.service</li>
+<li>开机启动 systemctl enable clickhouse-server.service</li>
+</ul>
+<!-- more -->
+<h1 id="vector安装使用">Vector安装使用</h1>
+<h3 id="下载安装">下载安装</h3>
+<pre><code>mkdir /data/vector -p
+curl --proto '=https' --tlsv1.2 -sSfL https://sh.vector.dev | bash -s -- -y --prefix /data/vector
+mkdir /data/vector/log -p
+mkdir /data/vector/scripts -p
+mkdir /data/vector/datahis   -p
+</code></pre>
+<h3 id="配置-2">配置</h3>
+<ul>
+<li>修改服务配置 /data/vector/config/vector.toml</li>
+</ul>
+<pre><code>data_dir = &quot;/data/vector/data&quot;
+
+[sources.input]
+type = &quot;file&quot;
+include = [&quot;/data/report/LogReport*&quot;]
+read_from = &quot;beginning&quot;
+fingerprint.strategy = &quot;device_and_inode&quot;
+
+
+# 解析数据
+[transforms.parse]
+type = &quot;remap&quot;
+inputs = [&quot;input&quot;]
+source = '''
+ log(.message, level: &quot;error&quot;)
+ . = parse_json!(.message)
+ if exists(.UserBase) {
+   ., err = merge(., .UserBase)
+   if err != null {
+     log(err, level: &quot;error&quot;)
+   }
+   del(.UserBase)
+}
+''' 
+
+# table,auth.password,auth.user,database根据情况修改
+[sinks.clickhouse]
+type = &quot;clickhouse&quot;
+inputs = [&quot;parse&quot;]
+endpoint = &quot;http://localhost:8123&quot;
+database = &quot;sgyn&quot;
+table = &quot;record&quot;
+skip_unknown_fields = true
+auth.password = &quot;renlong123&quot;
+auth.user = &quot;writer&quot;
+auth.strategy = &quot;basic&quot;
+buffer.type = &quot;disk&quot;
+buffer.max_size = 524288000
+acknowledgements.enabled = true
+batch.max_event = 1000
+batch.timeout_secs = 3 
+
+# Vector's GraphQL API (disabled by default)
+# Uncomment to try it out with the `vector top` command or
+# in your browser at http://localhost:8686
+[api]
+enabled = true
+address = &quot;127.0.0.1:8686&quot;
+</code></pre>
+<h3 id="操作下面两个脚本放在datavectorscripts目录下">操作(下面两个脚本放在/data/vector/scripts目录下)</h3>
+<ul>
+<li>启动(start.sh)</li>
+</ul>
+<pre><code>#!/bin/bash
+dir=$(cd $(dirname $0);cd ../;pwd)
+cmd=&quot;$dir/bin/vector -c $dir/config/vector.toml&quot;
+pid=$(ps -ef | grep &quot;$cmd&quot; | grep -v grep | awk '{print $2}')
+if [ -n &quot;$pid&quot; ]
+then
+        echo &quot;Vector[$pid]已经启动&quot;
+        exit
+fi
+
+$cmd &gt;&gt; &quot;$dir/log/vector.log&quot; 2&gt;&amp;1 &amp;
+for i in {1..5}
+do
+        pid=$(ps -ef | grep &quot;$cmd&quot; | grep -v grep | awk '{print $2}')
+        if [ -n &quot;$pid&quot; ]
+        then
+                echo &quot;Vector[$pid]启动成功&quot;
+                exit
+        fi
+        sleep 1s
+done
+
+echo &quot;Vector启动失败&quot;
+</code></pre>
+<!-- more -->
+<ul>
+<li>停止(stop.sh)</li>
+</ul>
+<pre><code>#!/bin/bash
+
+dir=$(cd $(dirname $0);cd ../;pwd)
+
+cmd=&quot;$dir/bin/vector -c $dir/config/vector.toml&quot;
+
+pid1=$(ps -ef | grep &quot;$cmd&quot; | grep -v grep | awk '{print $2}')
+if [ -z &quot;$pid1&quot; ]
+then
+        echo &quot;Vector未启动&quot;
+        exit
+fi
+
+kill -INT &quot;$pid1&quot;
+for i in {1..100}
+do
+        pid=$(ps -ef | grep &quot;$cmd&quot; | grep -v grep | awk '{print $2}')
+        if [ -z &quot;$pid&quot; ]
+        then
+                echo &quot;Vector[$pid1]关闭成功&quot;
+                exit
+        fi
+        sleep 1s
+done
+
+echo &quot;Vector[$pid1]关闭失败&quot;
+</code></pre>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li><a href="#clickhouse%E5%AE%89%E8%A3%85%E4%BD%BF%E7%94%A8">Clickhouse安装使用</a><br>
+*
+<ul>
+<li><a href="#%E5%AE%89%E8%A3%85">安装</a></li>
+<li><a href="#%E9%85%8D%E7%BD%AE">配置</a></li>
+<li><a href="#%E6%93%8D%E4%BD%9C">操作</a></li>
+</ul>
+</li>
+<li><a href="#vector%E5%AE%89%E8%A3%85%E4%BD%BF%E7%94%A8">Vector安装使用</a><br>
+*
+<ul>
+<li><a href="#%E4%B8%8B%E8%BD%BD%E5%AE%89%E8%A3%85">下载安装</a></li>
+<li><a href="#%E9%85%8D%E7%BD%AE-2">配置</a></li>
+<li><a href="#%E6%93%8D%E4%BD%9C%E4%B8%8B%E9%9D%A2%E4%B8%A4%E4%B8%AA%E8%84%9A%E6%9C%AC%E6%94%BE%E5%9C%A8datavectorscripts%E7%9B%AE%E5%BD%95%E4%B8%8B">操作(下面两个脚本放在/data/vector/scripts目录下)</a></li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://github.com/tuliyao/tuliyao.github.io/post/guo-nei-python-jing-xiang-yuan/">
+              <h3 class="post-title">
+                国内Python镜像源
+              </h3>
+            </a>
+          </div>
+        
+
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://github.com/tuliyao/tuliyao.github.io/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>

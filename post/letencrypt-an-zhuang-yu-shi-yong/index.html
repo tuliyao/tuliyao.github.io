@@ -1,0 +1,238 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>letencrypt安装与使用 | Gridea</title>
+<link rel="shortcut icon" href="https://github.com/tuliyao/tuliyao.github.io/favicon.ico?v=1724036220084">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://github.com/tuliyao/tuliyao.github.io/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="letencrypt安装与使用 | Gridea - Atom Feed" href="https://github.com/tuliyao/tuliyao.github.io/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+    <meta name="description" content="1.安装certbot
+没安装nginx需安装nginx插件, 端口80要开放，且没有被占用
+yum install python-certbot-nginx -y
+yum install certbot
+2.获取证书
+方式一： certb..." />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://github.com/tuliyao/tuliyao.github.io">
+  <img class="avatar" src="https://github.com/tuliyao/tuliyao.github.io/images/avatar.png?v=1724036220084" alt="">
+  </a>
+  <h1 class="site-title">
+    Gridea
+  </h1>
+  <p class="site-description">
+    温故而知新
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              letencrypt安装与使用
+            </h2>
+            <div class="post-info">
+              <span>
+                2023-02-22
+              </span>
+              <span>
+                2 min read
+              </span>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content" v-pre>
+                <p>1.安装certbot<br>
+没安装nginx需安装nginx插件, 端口80要开放，且没有被占用<br>
+yum install python-certbot-nginx -y<br>
+yum install certbot</p>
+<p>2.获取证书<br>
+方式一： certbot certonly -d 域名 --nginx<br>
+方式二：<br>
+certbot certonly<br>
+步骤1：初次使用第一步需要输入邮箱接收通知验证。后面再次申请证书时不会再弹出要求输入邮箱<br>
+步骤2： 给出了3个选项，选择选项2<br>
+步骤3：输入域名<br>
+<!-- more --><br>
+或者直接使用命令<br>
+certbot certonly -d 域名 --nginx<br>
+3.查看证书<br>
+certbot certificates</p>
+<p>4.定期更新证书<br>
+certbot renew</p>
+<!-- more -->
+<p>4.1 设置任务计划定时更新<br>
+0 1 1 */2 * /usr/local/cronlist/renewletsencrypt.sh &amp;</p>
+<pre><code>sh脚本内容：
+#!/bin/bash
+sudo certbot renew;
+sudo /etc/init.d/nginx reload;
+</code></pre>
+<p><a href="https://www.frankfeekr.cn/2021/03/28/let-is-encrypt-cerbot-for-https/"><strong>参考链接</strong></a></p>
+<pre><code>#!/bin/bash
+
+# 定义日志文件路径
+LOG_FILE=&quot;/var/log/letsencrypt/renew.log&quot;
+CERT_DIR=&quot;/etc/letsencrypt/live&quot;
+
+# 获取当前时间
+NOW=$(date +&quot;%Y-%m-%d %H:%M:%S&quot;)
+
+# 尝试更新证书
+echo &quot;[$NOW] Starting certificate renewal...&quot; &gt;&gt; $LOG_FILE
+certbot renew --quiet --no-self-upgrade
+
+# 检查 certbot 的退出状态
+if [ $? -ne 0 ]; then
+    echo &quot;[$NOW] Certificate renewal failed.&quot; &gt;&gt; $LOG_FILE
+    exit 1
+fi
+
+# 检查证书是否实际更新
+UPDATED=0
+for domain in $(ls $CERT_DIR); do
+    # 过滤掉 README 文件
+    if [ &quot;$domain&quot; == &quot;README&quot; ]; then
+        continue
+    fi
+
+    cert_file=&quot;$CERT_DIR/$domain/fullchain.pem&quot;
+    if [ $(find &quot;$cert_file&quot; -mtime -1) ]; then
+        echo &quot;[$NOW] Certificate for $domain was successfully renewed.&quot; &gt;&gt; $LOG_FILE
+        UPDATED=1
+    fi
+done
+
+if [ $UPDATED -eq 0 ]; then
+    echo &quot;[$NOW] No certificates were renewed.&quot; &gt;&gt; $LOG_FILE
+else
+    /data/release/thor_server/admin/grace_restart.sh &gt;&gt; $LOG_FILE
+fi
+
+echo &quot;[$NOW] Certificate renewal process completed.&quot; &gt;&gt; $LOG_FILE
+</code></pre>
+
+              </div>
+              <div class="toc-container">
+                
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://github.com/tuliyao/tuliyao.github.io/post/hello-gridea/">
+              <h3 class="post-title">
+                Hello Gridea
+              </h3>
+            </a>
+          </div>
+        
+
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://github.com/tuliyao/tuliyao.github.io/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>

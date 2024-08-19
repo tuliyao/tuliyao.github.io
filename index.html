@@ -1,0 +1,312 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Gridea</title>
+<link rel="shortcut icon" href="https://github.com/tuliyao/tuliyao.github.io/favicon.ico?v=1724036220084">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://github.com/tuliyao/tuliyao.github.io/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="Gridea - Atom Feed" href="https://github.com/tuliyao/tuliyao.github.io/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+    <meta name="description" content="温故而知新" />
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://github.com/tuliyao/tuliyao.github.io">
+  <img class="avatar" src="https://github.com/tuliyao/tuliyao.github.io/images/avatar.png?v=1724036220084" alt="">
+  </a>
+  <h1 class="site-title">
+    Gridea
+  </h1>
+  <p class="site-description">
+    温故而知新
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+    
+        <div class="post-container">
+  
+    <article class="post">
+      <a href="https://github.com/tuliyao/tuliyao.github.io/post/clickhousevector-an-zhuang-shi-yong/">
+        <h2 class="post-title">Clickhouse+Vector安装使用</h2>
+      </a>
+      <div class="post-info">
+        <span>
+          2024-01-22
+        </span>
+        <span>
+          4 min read
+        </span>
+        
+      </div>
+      
+      <div class="post-abstract">
+        <h1 id="clickhouse安装使用">Clickhouse安装使用</h1>
+<h3 id="安装">安装</h3>
+<pre><code>sudo yum install -y yum-utils
+sudo yum-config-manager --add-repo https://packages.clickhouse.com/rpm/clickhouse.repo
+sudo yum install -y clickhouse-server clickhouse-client
+
+sudo /etc/init.d/clickhouse-server start
+clickhouse-client # or &quot;clickhouse-client --password&quot; if you set up apassword.
+</code></pre>
+<h3 id="配置">配置</h3>
+<ul>
+<li>修改服务配置 /etc/clickhouse-server/config.xml</li>
+<li>修改用户配置  vim /etc/clickhouse-server/users.xml</li>
+<li>创建目录 /data/clickhouse</li>
+<li>给clickhouse用户添加目录权限 chown clickhouse:clickhouse /data/clickhouse</li>
+</ul>
+<h3 id="操作">操作</h3>
+<ul>
+<li>启动 systemctl start clickhouse-server.service</li>
+<li>停止 systemctl stop clickhouse-server.service</li>
+<li>查看 systemctl status clickhouse-server.service</li>
+<li>开机启动 systemctl enable clickhouse-server.service</li>
+</ul>
+
+      </div>
+    </article>
+  
+    <article class="post">
+      <a href="https://github.com/tuliyao/tuliyao.github.io/post/guo-nei-python-jing-xiang-yuan/">
+        <h2 class="post-title">国内Python镜像源</h2>
+      </a>
+      <div class="post-info">
+        <span>
+          2024-01-22
+        </span>
+        <span>
+          1 min read
+        </span>
+        
+      </div>
+      
+      <div class="post-abstract">
+        
+      </div>
+    </article>
+  
+    <article class="post">
+      <a href="https://github.com/tuliyao/tuliyao.github.io/post/jiao-huan-fen-qu-tian-jia/">
+        <h2 class="post-title">交换分区添加</h2>
+      </a>
+      <div class="post-info">
+        <span>
+          2024-01-18
+        </span>
+        <span>
+          3 min read
+        </span>
+        
+      </div>
+      
+      <div class="post-abstract">
+        
+      </div>
+    </article>
+  
+    <article class="post">
+      <a href="https://github.com/tuliyao/tuliyao.github.io/post/gong-ju-lie-biao/">
+        <h2 class="post-title">工具列表</h2>
+      </a>
+      <div class="post-info">
+        <span>
+          2023-09-20
+        </span>
+        <span>
+          1 min read
+        </span>
+        
+      </div>
+      
+      <div class="post-abstract">
+        
+      </div>
+    </article>
+  
+    <article class="post">
+      <a href="https://github.com/tuliyao/tuliyao.github.io/post/faststone-capture-zhu-ce-ma/">
+        <h2 class="post-title">faststone capture 注册码</h2>
+      </a>
+      <div class="post-info">
+        <span>
+          2023-09-20
+        </span>
+        <span>
+          1 min read
+        </span>
+        
+      </div>
+      
+      <div class="post-abstract">
+        
+      </div>
+    </article>
+  
+    <article class="post">
+      <a href="https://github.com/tuliyao/tuliyao.github.io/post/linux-xiu-gai-zhu-ji-ming/">
+        <h2 class="post-title">Linux修改主机名</h2>
+      </a>
+      <div class="post-info">
+        <span>
+          2023-06-06
+        </span>
+        <span>
+          1 min read
+        </span>
+        
+      </div>
+      
+      <div class="post-abstract">
+        
+      </div>
+    </article>
+  
+    <article class="post">
+      <a href="https://github.com/tuliyao/tuliyao.github.io/post/markdown-yu-fa/">
+        <h2 class="post-title">Markdown语法</h2>
+      </a>
+      <div class="post-info">
+        <span>
+          2023-03-16
+        </span>
+        <span>
+          1 min read
+        </span>
+        
+      </div>
+      
+      <div class="post-abstract">
+        
+      </div>
+    </article>
+  
+    <article class="post">
+      <a href="https://github.com/tuliyao/tuliyao.github.io/post/windows-ban-go-ban-ben-kong-zhi-gong-ju-jian-g-de-shi-yong/">
+        <h2 class="post-title">windows版go版本控制工具间g的使用</h2>
+      </a>
+      <div class="post-info">
+        <span>
+          2023-03-16
+        </span>
+        <span>
+          2 min read
+        </span>
+        
+      </div>
+      
+      <div class="post-abstract">
+        
+      </div>
+    </article>
+  
+    <article class="post">
+      <a href="https://github.com/tuliyao/tuliyao.github.io/post/git-ji-chu-ming-ling-cao-zuo-shi-yong/">
+        <h2 class="post-title">Git基础命令操作使用</h2>
+      </a>
+      <div class="post-info">
+        <span>
+          2023-03-10
+        </span>
+        <span>
+          1 min read
+        </span>
+        
+      </div>
+      
+      <div class="post-abstract">
+        <h1 id="还原远程分支到指定版本"><strong>还原远程分支到指定版本</strong></h1>
+<pre><code>- git reset --hard 指定版本号
+- git push -f -u origin 指定分支
+</code></pre>
+
+      </div>
+    </article>
+  
+    <article class="post">
+      <a href="https://github.com/tuliyao/tuliyao.github.io/post/yum-shi-yong/">
+        <h2 class="post-title">YUM使用</h2>
+      </a>
+      <div class="post-info">
+        <span>
+          2023-03-07
+        </span>
+        <span>
+          1 min read
+        </span>
+        
+      </div>
+      
+      <div class="post-abstract">
+        
+      </div>
+    </article>
+  
+</div>
+
+    
+        <div class="pagination-container">
+  
+  
+    <a href="https://github.com/tuliyao/tuliyao.github.io/page/2" class="next-page">下一页</a>
+  
+</div>
+
+    
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://github.com/tuliyao/tuliyao.github.io/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,258 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>交换分区添加 | Gridea</title>
+<link rel="shortcut icon" href="https://github.com/tuliyao/tuliyao.github.io/favicon.ico?v=1724036220084">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://github.com/tuliyao/tuliyao.github.io/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="交换分区添加 | Gridea - Atom Feed" href="https://github.com/tuliyao/tuliyao.github.io/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+    <meta name="description" content="链接
+进入/usr目录，创建swap文件
+[root@localhost usr]$ cd /usr
+
+创建swap文件夹,并进入该文件夹
+[root@localhost usr]# mkdir swap
+[root@localhost u..." />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://github.com/tuliyao/tuliyao.github.io">
+  <img class="avatar" src="https://github.com/tuliyao/tuliyao.github.io/images/avatar.png?v=1724036220084" alt="">
+  </a>
+  <h1 class="site-title">
+    Gridea
+  </h1>
+  <p class="site-description">
+    温故而知新
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              交换分区添加
+            </h2>
+            <div class="post-info">
+              <span>
+                2024-01-18
+              </span>
+              <span>
+                3 min read
+              </span>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content" v-pre>
+                <p><a href="https://cloud.tencent.com/developer/article/1704157">链接</a></p>
+<h2 id="进入usr目录创建swap文件">进入/usr目录，创建swap文件</h2>
+<pre><code>[root@localhost usr]$ cd /usr
+</code></pre>
+<h2 id="创建swap文件夹并进入该文件夹">创建swap文件夹,并进入该文件夹</h2>
+<pre><code>[root@localhost usr]# mkdir swap
+[root@localhost usr]# cd swap/
+[root@localhost swap]# pwd
+/usr/swap
+[root@localhost swap]# 
+</code></pre>
+<h2 id="创建swapfile文件使用命令dd-ifdevzero-ofusrswapswapfile-bs1m-count4096">创建swapfile文件，使用命令dd if=/dev/zero of=/usr/swap/swapfile bs=1M count=4096</h2>
+<pre><code>[root@localhost swap]# dd if=/dev/zero of=/usr/swap/swapfile bs=1M count=4096
+记录了4096+0 的读入
+记录了4096+0 的写出
+4294967296字节(4.3 GB)已复制，15.7479 秒，273 MB/秒
+[root@localhost swap]#
+</code></pre>
+<h2 id="查看swap文件使用命令du-sh-usrswapswapfile可以看到我们创建的这个swap文件为4g">查看swap文件,使用命令du -sh /usr/swap/swapfile，可以看到我们创建的这个swap文件为4g</h2>
+<pre><code>[root@localhost swap]# du -sh /usr/swap/swapfile
+4.1G	/usr/swap/swapfile
+[root@localhost swap]# 
+</code></pre>
+<h2 id="将目标设置为swap分区文件使用命令mkswap-usrswapswapfile将swapfile文件设置为swap分区文件">将目标设置为swap分区文件，使用命令mkswap /usr/swap/swapfile将swapfile文件设置为swap分区文件</h2>
+<pre><code>[root@localhost swap]# mkswap /usr/swap/swapfile
+mkswap: /usr/swap/swapfile: warning: don't erase bootbits sectors
+        on whole disk. Use -f to force.
+Setting up swapspace version 1, size = 4194300 KiB
+no label, UUID=5bd241ff-5375-449d-9975-5fdd429df784
+[root@localhost swap]#
+</code></pre>
+<h2 id="激活swap区并立即启用交换区文件使用命令swapon-usrswapswapfile">激活swap区，并立即启用交换区文件，使用命令swapon /usr/swap/swapfile</h2>
+<pre><code>[root@localhost swap]# swapon /usr/swap/swapfile
+[root@localhost swap]#
+</code></pre>
+<h2 id="使用命令free-m-来查看现在的内存可以看到里面的swap分区变成了4095m也就是4g内存">使用命令free -m 来查看现在的内存,可以看到里面的Swap分区变成了4095M，也就是4G内存。</h2>
+<pre><code>[root@localhost swap]# free -m
+             total       used       free     shared    buffers     cached
+Mem:           980        910         70          3          8        575
+-/+ buffers/cache:        326        654
+Swap:         4095          0       4095
+[root@localhost swap]#
+</code></pre>
+<h2 id="设置开机自动启用虚拟内存在etcfstab文件中加入如下命令">设置开机自动启用虚拟内存，在etc/fstab文件中加入如下命令</h2>
+<p>使用vim编辑器打开/etc/fstab文件<br>
+在文件中加入如下内容</p>
+<pre><code>/usr/swap/swapfile swap swap defaults 0 0
+</code></pre>
+<p>使用reboot命令重启服务器<br>
+输入reboot 命令来重启</p>
+<pre><code>[root@localhost swap]# reboot
+</code></pre>
+<h2 id="重启完成过后使用free-m-命令来查看现在的内存是否挂在上了">重启完成过后使用free -m 命令来查看现在的内存是否挂在上了。</h2>
+<pre><code>[root@localhost swap]# free -m
+             total       used       free     shared    buffers     cached
+Mem:           980        910         70          3          8        575
+-/+ buffers/cache:        326        654
+Swap:         4095          0       4095
+</code></pre>
+<h2 id="删除">删除</h2>
+<h3 id="1查看">1.查看</h3>
+<p><code>swapon -s</code></p>
+<h3 id="2禁用">2.禁用</h3>
+<p><code>swapoff /swapfile</code></p>
+<h3 id="3删除文件">3.删除文件</h3>
+<p><code>rm -f /swapfile</code></p>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#%E8%BF%9B%E5%85%A5usr%E7%9B%AE%E5%BD%95%E5%88%9B%E5%BB%BAswap%E6%96%87%E4%BB%B6">进入/usr目录，创建swap文件</a></li>
+<li><a href="#%E5%88%9B%E5%BB%BAswap%E6%96%87%E4%BB%B6%E5%A4%B9%E5%B9%B6%E8%BF%9B%E5%85%A5%E8%AF%A5%E6%96%87%E4%BB%B6%E5%A4%B9">创建swap文件夹,并进入该文件夹</a></li>
+<li><a href="#%E5%88%9B%E5%BB%BAswapfile%E6%96%87%E4%BB%B6%E4%BD%BF%E7%94%A8%E5%91%BD%E4%BB%A4dd-ifdevzero-ofusrswapswapfile-bs1m-count4096">创建swapfile文件，使用命令dd if=/dev/zero of=/usr/swap/swapfile bs=1M count=4096</a></li>
+<li><a href="#%E6%9F%A5%E7%9C%8Bswap%E6%96%87%E4%BB%B6%E4%BD%BF%E7%94%A8%E5%91%BD%E4%BB%A4du-sh-usrswapswapfile%E5%8F%AF%E4%BB%A5%E7%9C%8B%E5%88%B0%E6%88%91%E4%BB%AC%E5%88%9B%E5%BB%BA%E7%9A%84%E8%BF%99%E4%B8%AAswap%E6%96%87%E4%BB%B6%E4%B8%BA4g">查看swap文件,使用命令du -sh /usr/swap/swapfile，可以看到我们创建的这个swap文件为4g</a></li>
+<li><a href="#%E5%B0%86%E7%9B%AE%E6%A0%87%E8%AE%BE%E7%BD%AE%E4%B8%BAswap%E5%88%86%E5%8C%BA%E6%96%87%E4%BB%B6%E4%BD%BF%E7%94%A8%E5%91%BD%E4%BB%A4mkswap-usrswapswapfile%E5%B0%86swapfile%E6%96%87%E4%BB%B6%E8%AE%BE%E7%BD%AE%E4%B8%BAswap%E5%88%86%E5%8C%BA%E6%96%87%E4%BB%B6">将目标设置为swap分区文件，使用命令mkswap /usr/swap/swapfile将swapfile文件设置为swap分区文件</a></li>
+<li><a href="#%E6%BF%80%E6%B4%BBswap%E5%8C%BA%E5%B9%B6%E7%AB%8B%E5%8D%B3%E5%90%AF%E7%94%A8%E4%BA%A4%E6%8D%A2%E5%8C%BA%E6%96%87%E4%BB%B6%E4%BD%BF%E7%94%A8%E5%91%BD%E4%BB%A4swapon-usrswapswapfile">激活swap区，并立即启用交换区文件，使用命令swapon /usr/swap/swapfile</a></li>
+<li><a href="#%E4%BD%BF%E7%94%A8%E5%91%BD%E4%BB%A4free-m-%E6%9D%A5%E6%9F%A5%E7%9C%8B%E7%8E%B0%E5%9C%A8%E7%9A%84%E5%86%85%E5%AD%98%E5%8F%AF%E4%BB%A5%E7%9C%8B%E5%88%B0%E9%87%8C%E9%9D%A2%E7%9A%84swap%E5%88%86%E5%8C%BA%E5%8F%98%E6%88%90%E4%BA%864095m%E4%B9%9F%E5%B0%B1%E6%98%AF4g%E5%86%85%E5%AD%98">使用命令free -m 来查看现在的内存,可以看到里面的Swap分区变成了4095M，也就是4G内存。</a></li>
+<li><a href="#%E8%AE%BE%E7%BD%AE%E5%BC%80%E6%9C%BA%E8%87%AA%E5%8A%A8%E5%90%AF%E7%94%A8%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E5%9C%A8etcfstab%E6%96%87%E4%BB%B6%E4%B8%AD%E5%8A%A0%E5%85%A5%E5%A6%82%E4%B8%8B%E5%91%BD%E4%BB%A4">设置开机自动启用虚拟内存，在etc/fstab文件中加入如下命令</a></li>
+<li><a href="#%E9%87%8D%E5%90%AF%E5%AE%8C%E6%88%90%E8%BF%87%E5%90%8E%E4%BD%BF%E7%94%A8free-m-%E5%91%BD%E4%BB%A4%E6%9D%A5%E6%9F%A5%E7%9C%8B%E7%8E%B0%E5%9C%A8%E7%9A%84%E5%86%85%E5%AD%98%E6%98%AF%E5%90%A6%E6%8C%82%E5%9C%A8%E4%B8%8A%E4%BA%86">重启完成过后使用free -m 命令来查看现在的内存是否挂在上了。</a></li>
+<li><a href="#%E5%88%A0%E9%99%A4">删除</a>
+<ul>
+<li><a href="#1%E6%9F%A5%E7%9C%8B">1.查看</a></li>
+<li><a href="#2%E7%A6%81%E7%94%A8">2.禁用</a></li>
+<li><a href="#3%E5%88%A0%E9%99%A4%E6%96%87%E4%BB%B6">3.删除文件</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://github.com/tuliyao/tuliyao.github.io/post/gong-ju-lie-biao/">
+              <h3 class="post-title">
+                工具列表
+              </h3>
+            </a>
+          </div>
+        
+
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://github.com/tuliyao/tuliyao.github.io/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>

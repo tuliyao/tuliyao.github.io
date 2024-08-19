@@ -1,0 +1,456 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>https://github.com/tuliyao/tuliyao.github.io</id>
+    <title>Gridea</title>
+    <updated>2024-08-19T02:57:07.106Z</updated>
+    <generator>https://github.com/jpmonette/feed</generator>
+    <link rel="alternate" href="https://github.com/tuliyao/tuliyao.github.io"/>
+    <link rel="self" href="https://github.com/tuliyao/tuliyao.github.io/atom.xml"/>
+    <subtitle>温故而知新</subtitle>
+    <logo>https://github.com/tuliyao/tuliyao.github.io/images/avatar.png</logo>
+    <icon>https://github.com/tuliyao/tuliyao.github.io/favicon.ico</icon>
+    <rights>All rights reserved 2024, Gridea</rights>
+    <entry>
+        <title type="html"><![CDATA[Clickhouse+Vector安装使用]]></title>
+        <id>https://github.com/tuliyao/tuliyao.github.io/post/clickhousevector-an-zhuang-shi-yong/</id>
+        <link href="https://github.com/tuliyao/tuliyao.github.io/post/clickhousevector-an-zhuang-shi-yong/">
+        </link>
+        <updated>2024-01-22T09:52:03.000Z</updated>
+        <summary type="html"><![CDATA[<h1 id="clickhouse安装使用">Clickhouse安装使用</h1>
+<h3 id="安装">安装</h3>
+<pre><code>sudo yum install -y yum-utils
+sudo yum-config-manager --add-repo https://packages.clickhouse.com/rpm/clickhouse.repo
+sudo yum install -y clickhouse-server clickhouse-client
+
+sudo /etc/init.d/clickhouse-server start
+clickhouse-client # or &quot;clickhouse-client --password&quot; if you set up apassword.
+</code></pre>
+<h3 id="配置">配置</h3>
+<ul>
+<li>修改服务配置 /etc/clickhouse-server/config.xml</li>
+<li>修改用户配置  vim /etc/clickhouse-server/users.xml</li>
+<li>创建目录 /data/clickhouse</li>
+<li>给clickhouse用户添加目录权限 chown clickhouse:clickhouse /data/clickhouse</li>
+</ul>
+<h3 id="操作">操作</h3>
+<ul>
+<li>启动 systemctl start clickhouse-server.service</li>
+<li>停止 systemctl stop clickhouse-server.service</li>
+<li>查看 systemctl status clickhouse-server.service</li>
+<li>开机启动 systemctl enable clickhouse-server.service</li>
+</ul>
+]]></summary>
+        <content type="html"><![CDATA[<h1 id="clickhouse安装使用">Clickhouse安装使用</h1>
+<h3 id="安装">安装</h3>
+<pre><code>sudo yum install -y yum-utils
+sudo yum-config-manager --add-repo https://packages.clickhouse.com/rpm/clickhouse.repo
+sudo yum install -y clickhouse-server clickhouse-client
+
+sudo /etc/init.d/clickhouse-server start
+clickhouse-client # or &quot;clickhouse-client --password&quot; if you set up apassword.
+</code></pre>
+<h3 id="配置">配置</h3>
+<ul>
+<li>修改服务配置 /etc/clickhouse-server/config.xml</li>
+<li>修改用户配置  vim /etc/clickhouse-server/users.xml</li>
+<li>创建目录 /data/clickhouse</li>
+<li>给clickhouse用户添加目录权限 chown clickhouse:clickhouse /data/clickhouse</li>
+</ul>
+<h3 id="操作">操作</h3>
+<ul>
+<li>启动 systemctl start clickhouse-server.service</li>
+<li>停止 systemctl stop clickhouse-server.service</li>
+<li>查看 systemctl status clickhouse-server.service</li>
+<li>开机启动 systemctl enable clickhouse-server.service</li>
+</ul>
+<!-- more -->
+<h1 id="vector安装使用">Vector安装使用</h1>
+<h3 id="下载安装">下载安装</h3>
+<pre><code>mkdir /data/vector -p
+curl --proto '=https' --tlsv1.2 -sSfL https://sh.vector.dev | bash -s -- -y --prefix /data/vector
+mkdir /data/vector/log -p
+mkdir /data/vector/scripts -p
+mkdir /data/vector/datahis   -p
+</code></pre>
+<h3 id="配置-2">配置</h3>
+<ul>
+<li>修改服务配置 /data/vector/config/vector.toml</li>
+</ul>
+<pre><code>data_dir = &quot;/data/vector/data&quot;
+
+[sources.input]
+type = &quot;file&quot;
+include = [&quot;/data/report/LogReport*&quot;]
+read_from = &quot;beginning&quot;
+fingerprint.strategy = &quot;device_and_inode&quot;
+
+
+# 解析数据
+[transforms.parse]
+type = &quot;remap&quot;
+inputs = [&quot;input&quot;]
+source = '''
+ log(.message, level: &quot;error&quot;)
+ . = parse_json!(.message)
+ if exists(.UserBase) {
+   ., err = merge(., .UserBase)
+   if err != null {
+     log(err, level: &quot;error&quot;)
+   }
+   del(.UserBase)
+}
+''' 
+
+# table,auth.password,auth.user,database根据情况修改
+[sinks.clickhouse]
+type = &quot;clickhouse&quot;
+inputs = [&quot;parse&quot;]
+endpoint = &quot;http://localhost:8123&quot;
+database = &quot;sgyn&quot;
+table = &quot;record&quot;
+skip_unknown_fields = true
+auth.password = &quot;renlong123&quot;
+auth.user = &quot;writer&quot;
+auth.strategy = &quot;basic&quot;
+buffer.type = &quot;disk&quot;
+buffer.max_size = 524288000
+acknowledgements.enabled = true
+batch.max_event = 1000
+batch.timeout_secs = 3 
+
+# Vector's GraphQL API (disabled by default)
+# Uncomment to try it out with the `vector top` command or
+# in your browser at http://localhost:8686
+[api]
+enabled = true
+address = &quot;127.0.0.1:8686&quot;
+</code></pre>
+<h3 id="操作下面两个脚本放在datavectorscripts目录下">操作(下面两个脚本放在/data/vector/scripts目录下)</h3>
+<ul>
+<li>启动(start.sh)</li>
+</ul>
+<pre><code>#!/bin/bash
+dir=$(cd $(dirname $0);cd ../;pwd)
+cmd=&quot;$dir/bin/vector -c $dir/config/vector.toml&quot;
+pid=$(ps -ef | grep &quot;$cmd&quot; | grep -v grep | awk '{print $2}')
+if [ -n &quot;$pid&quot; ]
+then
+        echo &quot;Vector[$pid]已经启动&quot;
+        exit
+fi
+
+$cmd &gt;&gt; &quot;$dir/log/vector.log&quot; 2&gt;&amp;1 &amp;
+for i in {1..5}
+do
+        pid=$(ps -ef | grep &quot;$cmd&quot; | grep -v grep | awk '{print $2}')
+        if [ -n &quot;$pid&quot; ]
+        then
+                echo &quot;Vector[$pid]启动成功&quot;
+                exit
+        fi
+        sleep 1s
+done
+
+echo &quot;Vector启动失败&quot;
+</code></pre>
+<!-- more -->
+<ul>
+<li>停止(stop.sh)</li>
+</ul>
+<pre><code>#!/bin/bash
+
+dir=$(cd $(dirname $0);cd ../;pwd)
+
+cmd=&quot;$dir/bin/vector -c $dir/config/vector.toml&quot;
+
+pid1=$(ps -ef | grep &quot;$cmd&quot; | grep -v grep | awk '{print $2}')
+if [ -z &quot;$pid1&quot; ]
+then
+        echo &quot;Vector未启动&quot;
+        exit
+fi
+
+kill -INT &quot;$pid1&quot;
+for i in {1..100}
+do
+        pid=$(ps -ef | grep &quot;$cmd&quot; | grep -v grep | awk '{print $2}')
+        if [ -z &quot;$pid&quot; ]
+        then
+                echo &quot;Vector[$pid1]关闭成功&quot;
+                exit
+        fi
+        sleep 1s
+done
+
+echo &quot;Vector[$pid1]关闭失败&quot;
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[国内Python镜像源]]></title>
+        <id>https://github.com/tuliyao/tuliyao.github.io/post/guo-nei-python-jing-xiang-yuan/</id>
+        <link href="https://github.com/tuliyao/tuliyao.github.io/post/guo-nei-python-jing-xiang-yuan/">
+        </link>
+        <updated>2024-01-22T07:22:08.000Z</updated>
+        <content type="html"><![CDATA[<h3 id="清华大学">清华大学</h3>
+<p><code>https://pypi.tuna.tsinghua.edu.cn/simple </code><br>
+使用方法<br>
+<code>pip install -i https://pypi.tuna.tsinghua.edu.cn/simple some-package</code></p>
+<h3 id="阿里云镜像源">阿里云镜像源</h3>
+<p><code>https://mirrors.aliyun.com/pypi/simple/ </code><br>
+使用方法<br>
+`<br>
+pip install -i https://mirrors.aliyun.com/pypi/simple/ some-package</p>
+<h3 id="中国科技大学">中国科技大学</h3>
+<p><code>https://pypi.mirrors.ustc.edu.cn/simple/ </code><br>
+使用方法<br>
+<code>pip install -i https://pypi.mirrors.ustc.edu.cn/simple/ some-package</code></p>
+<h2 id="设置默认镜像源">设置默认镜像源</h2>
+<p><code>pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/ </code></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[交换分区添加]]></title>
+        <id>https://github.com/tuliyao/tuliyao.github.io/post/jiao-huan-fen-qu-tian-jia/</id>
+        <link href="https://github.com/tuliyao/tuliyao.github.io/post/jiao-huan-fen-qu-tian-jia/">
+        </link>
+        <updated>2024-01-18T02:14:07.000Z</updated>
+        <content type="html"><![CDATA[<p><a href="https://cloud.tencent.com/developer/article/1704157">链接</a></p>
+<h2 id="进入usr目录创建swap文件">进入/usr目录，创建swap文件</h2>
+<pre><code>[root@localhost usr]$ cd /usr
+</code></pre>
+<h2 id="创建swap文件夹并进入该文件夹">创建swap文件夹,并进入该文件夹</h2>
+<pre><code>[root@localhost usr]# mkdir swap
+[root@localhost usr]# cd swap/
+[root@localhost swap]# pwd
+/usr/swap
+[root@localhost swap]# 
+</code></pre>
+<h2 id="创建swapfile文件使用命令dd-ifdevzero-ofusrswapswapfile-bs1m-count4096">创建swapfile文件，使用命令dd if=/dev/zero of=/usr/swap/swapfile bs=1M count=4096</h2>
+<pre><code>[root@localhost swap]# dd if=/dev/zero of=/usr/swap/swapfile bs=1M count=4096
+记录了4096+0 的读入
+记录了4096+0 的写出
+4294967296字节(4.3 GB)已复制，15.7479 秒，273 MB/秒
+[root@localhost swap]#
+</code></pre>
+<h2 id="查看swap文件使用命令du-sh-usrswapswapfile可以看到我们创建的这个swap文件为4g">查看swap文件,使用命令du -sh /usr/swap/swapfile，可以看到我们创建的这个swap文件为4g</h2>
+<pre><code>[root@localhost swap]# du -sh /usr/swap/swapfile
+4.1G	/usr/swap/swapfile
+[root@localhost swap]# 
+</code></pre>
+<h2 id="将目标设置为swap分区文件使用命令mkswap-usrswapswapfile将swapfile文件设置为swap分区文件">将目标设置为swap分区文件，使用命令mkswap /usr/swap/swapfile将swapfile文件设置为swap分区文件</h2>
+<pre><code>[root@localhost swap]# mkswap /usr/swap/swapfile
+mkswap: /usr/swap/swapfile: warning: don't erase bootbits sectors
+        on whole disk. Use -f to force.
+Setting up swapspace version 1, size = 4194300 KiB
+no label, UUID=5bd241ff-5375-449d-9975-5fdd429df784
+[root@localhost swap]#
+</code></pre>
+<h2 id="激活swap区并立即启用交换区文件使用命令swapon-usrswapswapfile">激活swap区，并立即启用交换区文件，使用命令swapon /usr/swap/swapfile</h2>
+<pre><code>[root@localhost swap]# swapon /usr/swap/swapfile
+[root@localhost swap]#
+</code></pre>
+<h2 id="使用命令free-m-来查看现在的内存可以看到里面的swap分区变成了4095m也就是4g内存">使用命令free -m 来查看现在的内存,可以看到里面的Swap分区变成了4095M，也就是4G内存。</h2>
+<pre><code>[root@localhost swap]# free -m
+             total       used       free     shared    buffers     cached
+Mem:           980        910         70          3          8        575
+-/+ buffers/cache:        326        654
+Swap:         4095          0       4095
+[root@localhost swap]#
+</code></pre>
+<h2 id="设置开机自动启用虚拟内存在etcfstab文件中加入如下命令">设置开机自动启用虚拟内存，在etc/fstab文件中加入如下命令</h2>
+<p>使用vim编辑器打开/etc/fstab文件<br>
+在文件中加入如下内容</p>
+<pre><code>/usr/swap/swapfile swap swap defaults 0 0
+</code></pre>
+<p>使用reboot命令重启服务器<br>
+输入reboot 命令来重启</p>
+<pre><code>[root@localhost swap]# reboot
+</code></pre>
+<h2 id="重启完成过后使用free-m-命令来查看现在的内存是否挂在上了">重启完成过后使用free -m 命令来查看现在的内存是否挂在上了。</h2>
+<pre><code>[root@localhost swap]# free -m
+             total       used       free     shared    buffers     cached
+Mem:           980        910         70          3          8        575
+-/+ buffers/cache:        326        654
+Swap:         4095          0       4095
+</code></pre>
+<h2 id="删除">删除</h2>
+<h3 id="1查看">1.查看</h3>
+<p><code>swapon -s</code></p>
+<h3 id="2禁用">2.禁用</h3>
+<p><code>swapoff /swapfile</code></p>
+<h3 id="3删除文件">3.删除文件</h3>
+<p><code>rm -f /swapfile</code></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[工具列表]]></title>
+        <id>https://github.com/tuliyao/tuliyao.github.io/post/gong-ju-lie-biao/</id>
+        <link href="https://github.com/tuliyao/tuliyao.github.io/post/gong-ju-lie-biao/">
+        </link>
+        <updated>2023-09-20T10:08:04.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="截图工具">截图工具</h1>
+<ul>
+<li>snipast</li>
+<li>FSCapture</li>
+<li>ShareX</li>
+<li>OBS Studio</li>
+</ul>
+<h1 id="数据传输工具">数据传输工具</h1>
+<ul>
+<li>vector</li>
+</ul>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[faststone capture 注册码]]></title>
+        <id>https://github.com/tuliyao/tuliyao.github.io/post/faststone-capture-zhu-ce-ma/</id>
+        <link href="https://github.com/tuliyao/tuliyao.github.io/post/faststone-capture-zhu-ce-ma/">
+        </link>
+        <updated>2023-09-20T10:06:41.000Z</updated>
+        <content type="html"><![CDATA[<p>企业版​​序列号：<br>
+name：bluman<br>
+serial/序列号/注册码：VPISCJULXUFGDDXYAUYF</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Linux修改主机名]]></title>
+        <id>https://github.com/tuliyao/tuliyao.github.io/post/linux-xiu-gai-zhu-ji-ming/</id>
+        <link href="https://github.com/tuliyao/tuliyao.github.io/post/linux-xiu-gai-zhu-ji-ming/">
+        </link>
+        <updated>2023-06-06T08:25:24.000Z</updated>
+        <content type="html"><![CDATA[<h3 id="永久修改主机名">永久修改主机名</h3>
+<pre><code>1、方法一：使用hostnamectl命令
+
+[root@fangjian ~]# hostnamectl set-hostname Brace #永久设置用户名，关机后不失效
+[root@fangjian ~]# hostname
+brace
+
+2、方法二：修改配置文件 /etc/hostname 保存退出
+
+[root@fangjian ~]# vi /etc/hostname # 进入vi，删除旧主机名，输入新主机名，Esc后冒号 wq退出保存
+brace　　　　 # reboot重启生效
+</code></pre>
+<h2 id="临时修改主机名">临时修改主机名</h2>
+<pre><code>[root@fangjian ~]# hostname yin #临时修改主机名，关机后失效
+[root@fangjian ~]# hostname
+yin
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Markdown语法]]></title>
+        <id>https://github.com/tuliyao/tuliyao.github.io/post/markdown-yu-fa/</id>
+        <link href="https://github.com/tuliyao/tuliyao.github.io/post/markdown-yu-fa/">
+        </link>
+        <updated>2023-03-16T09:25:23.000Z</updated>
+        <content type="html"><![CDATA[<p><a href="https://markdown.com.cn/basic-syntax/links.html"><strong>参考文章1</strong></a><br>
+<a href="https://www.runoob.com/markdown/md-tutorial.html"><strong>参考文章2</strong></a></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[windows版go版本控制工具间g的使用]]></title>
+        <id>https://github.com/tuliyao/tuliyao.github.io/post/windows-ban-go-ban-ben-kong-zhi-gong-ju-jian-g-de-shi-yong/</id>
+        <link href="https://github.com/tuliyao/tuliyao.github.io/post/windows-ban-go-ban-ben-kong-zhi-gong-ju-jian-g-de-shi-yong/">
+        </link>
+        <updated>2023-03-16T09:20:45.000Z</updated>
+        <content type="html"><![CDATA[<p><a href="https://github.com/voidint/g">github地址</a><br>
+<strong>安装</strong></p>
+<blockquote>
+<p>创建目录mkdir ~/.g/bin<br>
+下载release的windows版本的二进制压缩包, 解压之后放到~/.g/bin目录下<br>
+默认二进制文件名是 g.exe, 如果你已经用g这个命令已经用作为 git 的缩写，那么你可以把 g.exe 改为其他名字，如 gvm.exe<br>
+执行命令code $PROFILE, 这个命令会用vscode打开默认的powershell配置文件<br>
+添加g.exe所在目录到环境变量PATH中</p>
+</blockquote>
+<p><strong>使用</strong><br>
+<em>查询当前可供安装的stable状态的go版本</em></p>
+<blockquote>
+<p>g ls-remote stable<br>
+1.13.15<br>
+1.14.7</p>
+</blockquote>
+<p><em>安装目标go版本1.14.7</em></p>
+<blockquote>
+<p>g install 1.14.7<br>
+Downloading 100% |███████████████| (119/119 MB, 9.939 MB/s) [12s:0s]<br>
+Computing checksum with SHA256<br>
+Checksums matched<br>
+Now using go1.14.7</p>
+</blockquote>
+<p><em>查询已安装的go版本</em></p>
+<blockquote>
+<p>g ls<br>
+1.7.6<br>
+1.11.13<br>
+1.12.17<br>
+1.13.15<br>
+1.14.6</p>
+</blockquote>
+<ul>
+<li>1.14.7</li>
+</ul>
+<p><em>查询可供安装的所有go版本</em></p>
+<blockquote>
+<p>g ls-remote<br>
+1<br>
+1.2.2<br>
+1.3<br>
+1.3.1<br>
+...    // 省略若干版本<br>
+1.14.5<br>
+1.14.6</p>
+</blockquote>
+<ul>
+<li>1.14.7<br>
+1.15rc1</li>
+</ul>
+<p><em>切换到另一个已安装的go版本</em></p>
+<blockquote>
+<p>g use 1.14.6<br>
+go version go1.14.6 darwin/amd64</p>
+</blockquote>
+<p><em>卸载一个已安装的go版本</em></p>
+<blockquote>
+<p>g uninstall 1.14.7<br>
+Uninstalled go1.14.7</p>
+</blockquote>
+<p><em>更新 g 软件本身</em></p>
+<blockquote>
+<p>g update<br>
+A new version of g(v1.2.2) is available<br>
+Downloading 100% |███████████████| (3.7/3.7 MB, 2.358 MB/s)<br>
+Computing checksum with SHA256<br>
+Checksums matched<br>
+Update completed</p>
+</blockquote>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Git基础命令操作使用]]></title>
+        <id>https://github.com/tuliyao/tuliyao.github.io/post/git-ji-chu-ming-ling-cao-zuo-shi-yong/</id>
+        <link href="https://github.com/tuliyao/tuliyao.github.io/post/git-ji-chu-ming-ling-cao-zuo-shi-yong/">
+        </link>
+        <updated>2023-03-10T07:04:41.000Z</updated>
+        <summary type="html"><![CDATA[<h1 id="还原远程分支到指定版本"><strong>还原远程分支到指定版本</strong></h1>
+<pre><code>- git reset --hard 指定版本号
+- git push -f -u origin 指定分支
+</code></pre>
+]]></summary>
+        <content type="html"><![CDATA[<h1 id="还原远程分支到指定版本"><strong>还原远程分支到指定版本</strong></h1>
+<pre><code>- git reset --hard 指定版本号
+- git push -f -u origin 指定分支
+</code></pre>
+<!-- more -->
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[YUM使用]]></title>
+        <id>https://github.com/tuliyao/tuliyao.github.io/post/yum-shi-yong/</id>
+        <link href="https://github.com/tuliyao/tuliyao.github.io/post/yum-shi-yong/">
+        </link>
+        <updated>2023-03-07T03:42:21.000Z</updated>
+        <content type="html"><![CDATA[<p>123</p>
+]]></content>
+    </entry>
+</feed>
